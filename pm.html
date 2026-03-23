@@ -1,0 +1,81 @@
+{% load static %}
+
+<!DOCtype html>
+<html lang="th">
+  <head>
+    <title>ระบบตรวจวัดคุณภาพอากาศ</title>
+    <link rel="stylesheet" href="{% static 'myapp/styles.css' %}"/>
+  </head>
+
+  <body>
+      <video autoplay muted loop id="bgVideo">
+        <source src="{% static 'myapp/ddd.mp4' %}" type="video/mp4">
+      </video>
+  	<header>ระบบตรวจวัดคุณภาพอากาศ</header>
+      <h2>กรุณาใส่รูปภาพ เพื่อตรวจวัดคุณภาพอากาศ</h2>
+
+  <div class="container">
+    <div class="image-box">
+      <img id="preview" src="{% if file_url %}{{ file_url }}{% endif %}" style="max-width:35%; display:{% if file_url %}block{% else %}none{% endif %};"></div>
+      {% if filename %}
+      <div class="info-box">ชื่อไฟล์ : {{ filename }}</div>
+      {% endif %}
+    <form method="POST" enctype="multipart/form-data" style="text-align:center;">
+      {% csrf_token %}
+      <label class="upload-btn">
+        Upload Image
+      <input type="file" name="imagepath" accept="image/*" onchange="previewImage(event)">
+      </label>
+      <button type="submit" class="predict-btn" >
+        Predict
+      </button>
+    </form>
+
+    {% if aqi_rf is not None %}
+      <div class="table-container">
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>PM</th>
+              <th>AQI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Random Forest</td>
+              <td>{{ pm_rf }}</td>
+              <td>{{ aqi_rf }}</td>
+            </tr>
+            <tr>
+              <td>Linear Regression</td>
+              <td>{{ pm_lr }}</td>
+              <td>{{ aqi_lr }}</td>
+            </tr>
+            <tr>
+              <td>SVR</td>
+              <td>{{ pm_svr }}</td>
+              <td>{{ aqi_svr }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+    {% if aqi_rf is not None %}
+    <h2>ผลสรุปคุณภาพอากาศ</h2>
+      <div class="aqi-box {{ aqi_color }}">
+          <h3>AQI เฉลี่ย : {{ aqi_avg }}</h3>
+          <p>ระดับคุณภาพอากาศ : {{ aqi_level }}</p>
+      </div>
+    {% endif %}
+  </div>
+  <script>
+  function previewImage(event) {
+    const img = document.getElementById("preview");
+    img.src = URL.createObjectURL(event.target.files[0]);
+    img.style.display = "block";
+  }
+
+  </script>
+  </body>
+</html>
